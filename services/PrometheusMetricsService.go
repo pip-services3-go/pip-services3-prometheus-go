@@ -11,56 +11,45 @@ import (
 	rpcservices "github.com/pip-services3-go/pip-services3-rpc-go/services"
 )
 
-/** @module services */
-// import { Descriptor } from "pip-services3-commons-node";
-// import { IReferences } from "pip-services3-commons-node";
-// import { RestService } from "pip-services3-rpc-node";
+/*
+Service that exposes "/metrics" route for Prometheus to scap performance metrics.
 
-// import { ContextInfo } from "pip-services3-components-node";
-// import { CachedCounters } from "pip-services3-components-node";
+ Configuration parameters
 
-// import { PrometheusCounters } from "../count/PrometheusCounters";
-// import { PrometheusCounterConverter } from "../count/PrometheusCounterConverter";
+- dependencies:
+  - endpoint:              override for HTTP Endpoint dependency
+  - prometheus-counters:   override for PrometheusCounters dependency
+- connection(s):
+  - discovery_key:         (optional) a key to retrieve the connection from IDiscovery
+  - protocol:              connection protocol: http or https
+  - host:                  host name or IP address
+  - port:                  port number
+  - uri:                   resource URI or connection string with all parameters in it
 
-/**
- * Service that exposes <code>"/metrics"</code> route for Prometheus to scap performance metrics.
- *
- * ### Configuration parameters ###
- *
- * - dependencies:
- *   - endpoint:              override for HTTP Endpoint dependency
- *   - prometheus-counters:   override for PrometheusCounters dependency
- * - connection(s):
- *   - discovery_key:         (optional) a key to retrieve the connection from IDiscovery
- *   - protocol:              connection protocol: http or https
- *   - host:                  host name or IP address
- *   - port:                  port number
- *   - uri:                   resource URI or connection string with all parameters in it
- *
- * ### References ###
- *
- * - <code>\*:logger:\*:\*:1.0</code>         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/log.ilogger.html ILogger]] components to pass log messages
- * - <code>\*:counters:\*:\*:1.0</code>         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/count.icounters.html ICounters]] components to pass collected measurements
- * - <code>\*:discovery:\*:\*:1.0</code>        (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/connect.idiscovery.html IDiscovery]] services to resolve connection
- * - <code>\*:endpoint:http:\*:1.0</code>          (optional) [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.httpendpoint.html HttpEndpoint]] reference to expose REST operation
- * - <code>\*:counters:prometheus:\*:1.0</code>    [[PrometheusCounters]] reference to retrieve collected metrics
- *
- * @see [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.restservice.html RestService]]
- * @see [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/clients.restclient.html RestClient]]
- *
- * ### Example ###
- *
- *     let service = new PrometheusMetricsService();
- *     service.configure(ConfigParams.fromTuples(
- *         "connection.protocol", "http",
- *         "connection.host", "localhost",
- *         "connection.port", 8080
- *     ));
- *
- *     service.open("123", (err) => {
- *        console.log("The Prometheus metrics service is accessible at http://+:8080/metrics");
- *     });
- */
+ References
+
+- *:logger:*:*:1.0         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/log.ilogger.html ILogger]] components to pass log messages
+- *:counters:*:*:1.0         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/count.icounters.html ICounters]] components to pass collected measurements
+- *:discovery:*:*:1.0        (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/connect.idiscovery.html IDiscovery]] services to resolve connection
+- *:endpoint:http:*:1.0          (optional) [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.httpendpoint.html HttpEndpoint]] reference to expose REST operation
+- *:counters:prometheus:*:1.0    [[PrometheusCounters]] reference to retrieve collected metrics
+
+See [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.restservice.html RestService]]
+See [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/clients.restclient.html RestClient]]
+
+ Example
+
+    let service = new PrometheusMetricsService();
+    service.configure(ConfigParams.fromTuples(
+        "connection.protocol", "http",
+        "connection.host", "localhost",
+        "connection.port", 8080
+    ));
+
+    service.open("123", (err) => {
+       console.log("The Prometheus metrics service is accessible at http://+:8080/metrics");
+    });
+*/
 type PrometheusMetricsService struct {
 	*rpcservices.RestService
 	cachedCounters *ccount.CachedCounters
@@ -68,9 +57,9 @@ type PrometheusMetricsService struct {
 	instance       string
 }
 
-/**
- * Creates a new instance of c service.
- */
+/*
+Creates a new instance of c service.
+*/
 func NewPrometheusMetricsService() *PrometheusMetricsService {
 	pms := PrometheusMetricsService{}
 	pms.RestService = rpcservices.NewRestService()
@@ -80,11 +69,11 @@ func NewPrometheusMetricsService() *PrometheusMetricsService {
 	return &pms
 }
 
-/**
- * Sets references to dependent components.
- *
- * @param references 	references to locate the component dependencies.
- */
+/*
+Sets references to dependent components.
+
+Return references 	references to locate the component dependencies.
+*/
 func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	c.RestService.SetReferences(references)
 
@@ -106,19 +95,19 @@ func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	}
 }
 
-/**
- * Registers all service routes in HTTP endpoint.
- */
+/*
+Registers all service routes in HTTP endpoint.
+*/
 func (c *PrometheusMetricsService) Register() {
 	c.RegisterRoute("get", "metrics", nil, func(res http.ResponseWriter, req *http.Request) { c.metrics(res, req) })
 }
 
-/**
- * Handles metrics requests
- *
- * @param req   an HTTP request
- * @param res   an HTTP response
- */
+/*
+Handles metrics requests
+
+Return req   an HTTP request
+Return res   an HTTP response
+*/
 func (c *PrometheusMetricsService) metrics(res http.ResponseWriter, req *http.Request) {
 
 	var counters []*ccount.Counter

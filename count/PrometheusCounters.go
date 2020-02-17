@@ -15,74 +15,57 @@ import (
 	rpcconnect "github.com/pip-services3-go/pip-services3-rpc-go/connect"
 )
 
-// /** @module count */
-// /** @hidden */
-// let os = require("os");
+/*
+Performance counters that send their metrics to Prometheus service.
 
-// import { ConfigParams } from "pip-services3-commons-node";
-// import { IReferenceable } from "pip-services3-commons-node";
-// import { IReferences } from "pip-services3-commons-node";
-// import { Descriptor } from "pip-services3-commons-node";
-// import { IOpenable } from "pip-services3-commons-node";
-// import { CachedCounters } from "pip-services3-components-node";
-// import { Counter } from "pip-services3-components-node";
-// import { CompositeLogger } from "pip-services3-components-node";
-// import { ContextInfo } from "pip-services3-components-node";
-// import { HttpConnectionResolver } from "pip-services3-rpc-node";
+The component is normally used in passive mode conjunction with PrometheusMetricsService.
+Alternatively when connection parameters are set it can push metrics to Prometheus PushGateway.
 
-// import { PrometheusCounterConverter } from "./PrometheusCounterConverter";
+ Configuration parameters
 
-// /**
-// Performance counters that send their metrics to Prometheus service.
-//  *
-// The component is normally used in passive mode conjunction with [[PrometheusMetricsService]].
-// Alternatively when connection parameters are set it can push metrics to Prometheus PushGateway.
-//  *
-// ### Configuration parameters ###
-//  *
-// - connection(s):
-//   - discovery_key:         (optional) a key to retrieve the connection from [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/connect.idiscovery.html IDiscovery]]
-//   - protocol:              connection protocol: http or https
-//   - host:                  host name or IP address
-//   - port:                  port number
-//   - uri:                   resource URI or connection string with all parameters in it
-// - options:
-//   - retries:               number of retries (default: 3)
-//   - connect_timeout:       connection timeout in milliseconds (default: 10 sec)
-//   - timeout:               invocation timeout in milliseconds (default: 10 sec)
-//  *
-// ### References ###
-//  *
-// - <code>\*:logger:\*:\*:1.0</code>         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/log.ilogger.html ILogger]] components to pass log messages
-// - <code>\*:counters:\*:\*:1.0</code>         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/count.icounters.html ICounters]] components to pass collected measurements
-// - <code>\*:discovery:\*:\*:1.0</code>        (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/connect.idiscovery.html IDiscovery]] services to resolve connection
-//  *
-// @see [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.restservice.html RestService]]
-// @see [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.commandablehttpservice.html CommandableHttpService]]
-//  *
-// ### Example ###
-//  *
-//     let counters = new PrometheusCounters();
-//     counters.configure(ConfigParams.fromTuples(
-//         "connection.protocol", "http",
-//         "connection.host", "localhost",
-//         "connection.port", 8080
-//     ));
-//  *
-//     counters.open("123", (err) => {
-//         ...
-//     });
-//  *
-//     counters.increment("mycomponent.mymethod.calls");
-//     let timing = counters.beginTiming("mycomponent.mymethod.exec_time");
-//     try {
-//         ...
-//     } finally {
-//         timing.endTiming();
-//     }
-//  *
-//     counters.dump();
-//  */
+- connection(s):
+  - discovery_key:         (optional) a key to retrieve the connection from connect.idiscovery.html IDiscovery
+  - protocol:              connection protocol: http or https
+  - host:                  host name or IP address
+  - port:                  port number
+  - uri:                   resource URI or connection string with all parameters in it
+- options:
+  - retries:               number of retries (default: 3)
+  - connect_timeout:       connection timeout in milliseconds (default: 10 sec)
+  - timeout:               invocation timeout in milliseconds (default: 10 sec)
+
+ References
+
+- *:logger:*:*:1.0         (optional) ILogger components to pass log messages
+- *:counters:*:*:1.0         (optional) ICounters components to pass collected measurements
+- *:discovery:*:*:1.0        (optional)  IDiscovery services to resolve connection
+
+See sRestService
+See  CommandableHttpService
+
+ Example
+
+    let counters = new PrometheusCounters();
+    counters.configure(ConfigParams.fromTuples(
+        "connection.protocol", "http",
+        "connection.host", "localhost",
+        "connection.port", 8080
+    ));
+
+    counters.open("123", (err) => {
+        ...
+    });
+
+    counters.increment("mycomponent.mymethod.calls");
+    let timing = counters.beginTiming("mycomponent.mymethod.exec_time");
+    try {
+        ...
+    } finally {
+        timing.endTiming();
+    }
+
+    counters.dump();
+*/
 //implements IReferenceable, IOpenable {
 type PrometheusCounters struct {
 	*ccount.CachedCounters
@@ -99,25 +82,28 @@ type PrometheusCounters struct {
 	uri                string
 }
 
-/**
+/*
 Creates a new instance of the performance counters.
 */
 func NewPrometheusCounters() *PrometheusCounters {
 	// super();
 	pc := PrometheusCounters{}
 	pc.CachedCounters = ccount.InheritCacheCounters(&pc)
+	pc.logger = clog.NewCompositeLogger()
 	pc.connectionResolver = rpcconnect.NewHttpConnectionResolver()
 	pc.opened = false
+	pc.timeout = 10000
+	pc.retries = 3
+	pc.connectTimeout = 10000
 	return &pc
-
 }
 
-/**
+/*
 Configures component by passing configuration parameters.
- *
+
 - config    configuration parameters to be set.
 */
-func (c *PrometheusCounters) configure(config *cconf.ConfigParams) {
+func (c *PrometheusCounters) Configure(config *cconf.ConfigParams) {
 
 	c.CachedCounters.Configure(config)
 
@@ -129,7 +115,7 @@ func (c *PrometheusCounters) configure(config *cconf.ConfigParams) {
 	c.timeout = config.GetAsIntegerWithDefault("options.timeout", c.timeout)
 }
 
-/**
+/*
 Sets references to dependent components.
  *
 - references 	references to locate the component dependencies.
@@ -148,18 +134,18 @@ func (c *PrometheusCounters) SetReferences(references cref.IReferences) {
 	}
 }
 
-/**
+/*
 Checks if the component is opened.
- *
-@returns true if the component has been opened and false otherwise.
+
+Returns true if the component has been opened and false otherwise.
 */
-func (c *PrometheusCounters) isOpen() bool {
+func (c *PrometheusCounters) IsOpen() bool {
 	return c.opened
 }
 
-/**
+/*
 Opens the component.
- *
+
 - correlationId 	(optional) transaction id to trace execution through call chain.
 - callback 			callback function that receives error or nil no errors occured.
 */
@@ -168,12 +154,13 @@ func (c *PrometheusCounters) Open(correlationId string) (err error) {
 		return nil
 	}
 
+	c.opened = true
 	connection, _, err := c.connectionResolver.Resolve(correlationId)
 
 	if err != nil {
 		c.client = nil
 		c.logger.Warn(correlationId, "Connection to Prometheus server is not configured: "+err.Error())
-		return err
+		return nil
 	}
 
 	c.uri = connection.Uri()
@@ -197,13 +184,13 @@ func (c *PrometheusCounters) Open(correlationId string) (err error) {
 		ex := cerr.NewConnectionError(correlationId, "CANNOT_CONNECT", "Connection to REST service failed").WithDetails("url", c.uri)
 		return ex
 	}
-	c.opened = true
+
 	return nil
 }
 
-/**
+/*
 Closes component and frees used resources.
- *
+
 - correlationId 	(optional) transaction id to trace execution through call chain.
 - callback 			callback function that receives error or nil no errors occured.
 */
@@ -214,9 +201,9 @@ func (c *PrometheusCounters) Close(correlationId string) error {
 	return nil
 }
 
-/**
+/*
 Saves the current counters measurements.
- *
+
 - counters      current counters measurements to be saves.
 */
 func (c *PrometheusCounters) Save(counters []*ccount.Counter) (err error) {

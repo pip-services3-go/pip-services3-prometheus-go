@@ -100,7 +100,7 @@ func (c *TPrometheusCounterConverter) generateCounterLabel(counter *ccount.Count
 	}
 
 	builder := "{"
-	for _, key := range labels {
+	for key, _ := range labels {
 		if len(builder) > 1 {
 			builder += ","
 		}
