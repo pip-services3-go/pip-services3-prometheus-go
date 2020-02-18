@@ -61,7 +61,4 @@ func TestPrometheusMetricsService(t *testing.T) {
 	assert.True(t, getRes.StatusCode < 400)
 	body, _ := ioutil.ReadAll(getRes.Body)
 	assert.True(t, len(body) > 0)
-
-	for {
-	}
 }

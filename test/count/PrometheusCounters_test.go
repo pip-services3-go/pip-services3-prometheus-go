@@ -19,7 +19,7 @@ func TestPrometheusCounters(t *testing.T) {
 	}
 	port := os.Getenv("PUSHGATEWAY_SERVICE_PORT")
 	if port == "" {
-		port = "9090"
+		port = "9091"
 	}
 	counters = pcount.NewPrometheusCounters()
 	fixture = pfixture.NewCountersFixture(counters.CachedCounters)

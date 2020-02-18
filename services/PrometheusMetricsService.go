@@ -28,14 +28,14 @@ Service that exposes "/metrics" route for Prometheus to scap performance metrics
 
  References
 
-- *:logger:*:*:1.0         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/log.ilogger.html ILogger]] components to pass log messages
-- *:counters:*:*:1.0         (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/count.icounters.html ICounters]] components to pass collected measurements
-- *:discovery:*:*:1.0        (optional) [[https://rawgit.com/pip-services-node/pip-services3-components-node/master/doc/api/interfaces/connect.idiscovery.html IDiscovery]] services to resolve connection
-- *:endpoint:http:*:1.0          (optional) [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.httpendpoint.html HttpEndpoint]] reference to expose REST operation
-- *:counters:prometheus:*:1.0    [[PrometheusCounters]] reference to retrieve collected metrics
+- *:logger:*:*:1.0         (optional)  ILogger components to pass log messages
+- *:counters:*:*:1.0         (optional)  ICounters components to pass collected measurements
+- *:discovery:*:*:1.0        (optional)  IDiscovery services to resolve connection
+- *:endpoint:http:*:1.0          (optional)  HttpEndpoint reference to expose REST operation
+- *:counters:prometheus:*:1.0    PrometheusCounters reference to retrieve collected metrics
 
-See [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/services.restservice.html RestService]]
-See [[https://rawgit.com/pip-services-node/pip-services3-rpc-node/master/doc/api/classes/clients.restclient.html RestClient]]
+See  RestService
+See RestClient
 
  Example
 
@@ -57,9 +57,8 @@ type PrometheusMetricsService struct {
 	instance       string
 }
 
-/*
-Creates a new instance of c service.
-*/
+// Creates a new instance of c service.
+
 func NewPrometheusMetricsService() *PrometheusMetricsService {
 	pms := PrometheusMetricsService{}
 	pms.RestService = rpcservices.NewRestService()
@@ -69,11 +68,9 @@ func NewPrometheusMetricsService() *PrometheusMetricsService {
 	return &pms
 }
 
-/*
-Sets references to dependent components.
+// Sets references to dependent components.
 
-Return references 	references to locate the component dependencies.
-*/
+// Return references 	references to locate the component dependencies.
 func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	c.RestService.SetReferences(references)
 
@@ -95,19 +92,14 @@ func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	}
 }
 
-/*
-Registers all service routes in HTTP endpoint.
-*/
+// Registers all service routes in HTTP endpoint.
 func (c *PrometheusMetricsService) Register() {
 	c.RegisterRoute("get", "metrics", nil, func(res http.ResponseWriter, req *http.Request) { c.metrics(res, req) })
 }
 
-/*
-Handles metrics requests
-
-Return req   an HTTP request
-Return res   an HTTP response
-*/
+// Handles metrics requests
+// Return req   an HTTP request
+// Return res   an HTTP response
 func (c *PrometheusMetricsService) metrics(res http.ResponseWriter, req *http.Request) {
 
 	var counters []*ccount.Counter

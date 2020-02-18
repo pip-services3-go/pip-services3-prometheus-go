@@ -65,10 +65,12 @@ func (c *TPrometheusCounterConverter) ToString(counters []*ccount.Counter, sourc
 			builder += "# TYPE " + counterName + "_count gauge\n"
 			builder += counterName + "_count" + labels + " " + cconv.StringConverter.ToString(counter.Count) + "\n"
 			break
-			//case ccount.Timestamp: // Prometheus doesn't support non-numeric metrics
-			//builder += "# TYPE " + counterName + " untyped\n";
-			//builder += counterName + labels + " " + cconv.StringConverter.ToString(counter.time) + "\n";
-			//break;
+			// ToDo: Are needed timestamp type?
+
+			// case ccount.Timestamp: // Prometheus doesn't support non-numeric metrics
+			// 	builder += "# TYPE " + counterName + " untyped\n"
+			// 	builder += counterName + labels + " " + cconv.StringConverter.ToString(counter.Time) + "\n"
+			// 	break
 		}
 	}
 
