@@ -7,7 +7,7 @@ To use the commons you can either include dependency into your go file:
 
     ...
     import (
-        ellog "github.com/pip-services3-go/pip-services3-prometheus-go/count"
+        pcount "github.com/pip-services3-go/pip-services3-prometheus-go/count"
     )
 
 ``` 
