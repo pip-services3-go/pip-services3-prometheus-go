@@ -16,12 +16,12 @@ import (
 )
 
 /*
-Performance counters that send their metrics to Prometheus service.
+PrometheusCounters performance counters that send their metrics to Prometheus service.
 
 The component is normally used in passive mode conjunction with PrometheusMetricsService.
 Alternatively when connection parameters are set it can push metrics to Prometheus PushGateway.
 
- Configuration parameters
+Configuration parameters:
 
 - connection(s):
   - discovery_key:         (optional) a key to retrieve the connection from connect.idiscovery.html IDiscovery
@@ -34,39 +34,33 @@ Alternatively when connection parameters are set it can push metrics to Promethe
   - connect_timeout:       connection timeout in milliseconds (default: 10 sec)
   - timeout:               invocation timeout in milliseconds (default: 10 sec)
 
- References
+References:
 
 - *:logger:*:*:1.0         (optional) ILogger components to pass log messages
 - *:counters:*:*:1.0         (optional) ICounters components to pass collected measurements
 - *:discovery:*:*:1.0        (optional)  IDiscovery services to resolve connection
 
-See sRestService
-See  CommandableHttpService
+See:  RestService
+See:  CommandableHttpService
 
- Example
+Example:
 
-    let counters = new PrometheusCounters();
-    counters.configure(ConfigParams.fromTuples(
+    counters = NewPrometheusCounters();
+    counters.Configure(cconf.NewConfigParamsFromTuples(
         "connection.protocol", "http",
         "connection.host", "localhost",
         "connection.port", 8080
     ));
 
-    counters.open("123", (err) => {
-        ...
-    });
+	counters.Open("123")
 
-    counters.increment("mycomponent.mymethod.calls");
-    let timing = counters.beginTiming("mycomponent.mymethod.exec_time");
-    try {
+    counters.Increment("mycomponent.mymethod.calls");
+    timing := counters.BeginTiming("mycomponent.mymethod.exec_time");
         ...
-    } finally {
-        timing.endTiming();
-    }
+    timing.EndTiming();
 
-    counters.dump();
+    counters.Dump();
 */
-//implements IReferenceable, IOpenable {
 type PrometheusCounters struct {
 	*ccount.CachedCounters
 	logger             *clog.CompositeLogger
@@ -82,27 +76,25 @@ type PrometheusCounters struct {
 	uri                string
 }
 
-/*
-Creates a new instance of the performance counters.
-*/
+// NewPrometheusCounters is creates a new instance of the performance counters.
+// Returns *PrometheusCounters
+// pointer on new instance
 func NewPrometheusCounters() *PrometheusCounters {
-	// super();
-	pc := PrometheusCounters{}
-	pc.CachedCounters = ccount.InheritCacheCounters(&pc)
-	pc.logger = clog.NewCompositeLogger()
-	pc.connectionResolver = rpcconnect.NewHttpConnectionResolver()
-	pc.opened = false
-	pc.timeout = 10000
-	pc.retries = 3
-	pc.connectTimeout = 10000
-	return &pc
+	c := PrometheusCounters{}
+	c.CachedCounters = ccount.InheritCacheCounters(&c)
+	c.logger = clog.NewCompositeLogger()
+	c.connectionResolver = rpcconnect.NewHttpConnectionResolver()
+	c.opened = false
+	c.timeout = 10000
+	c.retries = 3
+	c.connectTimeout = 10000
+	return &c
 }
 
-/*
-Configures component by passing configuration parameters.
-
-- config    configuration parameters to be set.
-*/
+// Configure method are configures component by passing configuration parameters.
+// Parameters:
+// - config   *cconf.ConfigParams
+// configuration parameters to be set.
 func (c *PrometheusCounters) Configure(config *cconf.ConfigParams) {
 
 	c.CachedCounters.Configure(config)
@@ -115,11 +107,9 @@ func (c *PrometheusCounters) Configure(config *cconf.ConfigParams) {
 	c.timeout = config.GetAsIntegerWithDefault("options.timeout", c.timeout)
 }
 
-/*
-Sets references to dependent components.
- *
-- references 	references to locate the component dependencies.
-*/
+// SetReferences method are sets references to dependent components.
+// - references  cref.IReferences
+// references to locate the component dependencies.
 func (c *PrometheusCounters) SetReferences(references cref.IReferences) {
 	c.logger.SetReferences(references)
 	c.connectionResolver.SetReferences(references)
@@ -134,21 +124,17 @@ func (c *PrometheusCounters) SetReferences(references cref.IReferences) {
 	}
 }
 
-/*
-Checks if the component is opened.
-
-Returns true if the component has been opened and false otherwise.
-*/
+// IsOpen method are checks if the component is opened.
+// Returns true if the component has been opened and false otherwise.
 func (c *PrometheusCounters) IsOpen() bool {
 	return c.opened
 }
 
-/*
-Opens the component.
-
-- correlationId 	(optional) transaction id to trace execution through call chain.
-- callback 			callback function that receives error or nil no errors occured.
-*/
+// Open method are opens the component.
+// - correlationId 	string
+// (optional) transaction id to trace execution through call chain.
+// Returns error
+//	error or nil, if no errors occured.
 func (c *PrometheusCounters) Open(correlationId string) (err error) {
 	if c.opened {
 		return nil
@@ -188,12 +174,12 @@ func (c *PrometheusCounters) Open(correlationId string) (err error) {
 	return nil
 }
 
-/*
-Closes component and frees used resources.
-
-- correlationId 	(optional) transaction id to trace execution through call chain.
-- callback 			callback function that receives error or nil no errors occured.
-*/
+// Close method are closes component and frees used resources.
+// Parameters:
+// - correlationId string
+//	(optional) transaction id to trace execution through call chain.
+// Returns error
+// error or nil, if no errors occured.
 func (c *PrometheusCounters) Close(correlationId string) error {
 	c.opened = false
 	c.client = nil
@@ -201,11 +187,11 @@ func (c *PrometheusCounters) Close(correlationId string) error {
 	return nil
 }
 
-/*
-Saves the current counters measurements.
-
-- counters      current counters measurements to be saves.
-*/
+// Save method are saves the current counters measurements.
+// - counters   []*ccount.Counter
+//    current counters measurements to be saves.
+// Retruns error
+// error or nil, if no errors occured.
 func (c *PrometheusCounters) Save(counters []*ccount.Counter) (err error) {
 	if c.client == nil {
 		return nil

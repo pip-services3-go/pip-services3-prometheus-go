@@ -12,9 +12,9 @@ import (
 )
 
 /*
-Service that exposes "/metrics" route for Prometheus to scap performance metrics.
+PrometheusMetricsService is service that exposes "/metrics" route for Prometheus to scap performance metrics.
 
- Configuration parameters
+Configuration parameters:
 
 - dependencies:
   - endpoint:              override for HTTP Endpoint dependency
@@ -26,7 +26,7 @@ Service that exposes "/metrics" route for Prometheus to scap performance metrics
   - port:                  port number
   - uri:                   resource URI or connection string with all parameters in it
 
- References
+References:
 
 - *:logger:*:*:1.0         (optional)  ILogger components to pass log messages
 - *:counters:*:*:1.0         (optional)  ICounters components to pass collected measurements
@@ -34,21 +34,23 @@ Service that exposes "/metrics" route for Prometheus to scap performance metrics
 - *:endpoint:http:*:1.0          (optional)  HttpEndpoint reference to expose REST operation
 - *:counters:prometheus:*:1.0    PrometheusCounters reference to retrieve collected metrics
 
-See  RestService
+See RestService
 See RestClient
 
  Example
 
-    let service = new PrometheusMetricsService();
-    service.configure(ConfigParams.fromTuples(
+    service := NewPrometheusMetricsService();
+    service.Configure(cconf.NewConfigParamsFromTuples(
         "connection.protocol", "http",
         "connection.host", "localhost",
-        "connection.port", 8080
+        "connection.port", "8080",
     ));
 
-    service.open("123", (err) => {
-       console.log("The Prometheus metrics service is accessible at http://+:8080/metrics");
-    });
+	err := service.Open("123")
+	if  err == nil {
+	   fmt.Println("The Prometheus metrics service is accessible at http://localhost:8080/metrics");
+	   defer service.Close("")
+    }
 */
 type PrometheusMetricsService struct {
 	*rpcservices.RestService
@@ -57,20 +59,22 @@ type PrometheusMetricsService struct {
 	instance       string
 }
 
-// Creates a new instance of c service.
-
+// NewPrometheusMetricsService are creates a new instance of c service.
+// Returns *PrometheusMetricsService
+// pointer on new instance
 func NewPrometheusMetricsService() *PrometheusMetricsService {
-	pms := PrometheusMetricsService{}
-	pms.RestService = rpcservices.NewRestService()
-	pms.RestService.IRegisterable = &pms
-	pms.DependencyResolver.Put("cached-counters", cref.NewDescriptor("pip-services", "counters", "cached", "*", "1.0"))
-	pms.DependencyResolver.Put("prometheus-counters", cref.NewDescriptor("pip-services", "counters", "prometheus", "*", "1.0"))
-	return &pms
+	c := PrometheusMetricsService{}
+	c.RestService = rpcservices.NewRestService()
+	c.RestService.IRegisterable = &c
+	c.DependencyResolver.Put("cached-counters", cref.NewDescriptor("pip-services", "counters", "cached", "*", "1.0"))
+	c.DependencyResolver.Put("prometheus-counters", cref.NewDescriptor("pip-services", "counters", "prometheus", "*", "1.0"))
+	return &c
 }
 
-// Sets references to dependent components.
-
-// Return references 	references to locate the component dependencies.
+// SetReferences is sets references to dependent components.
+// Parameters:
+// - references cref.IReferences
+// references to locate the component dependencies.
 func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	c.RestService.SetReferences(references)
 
@@ -92,14 +96,14 @@ func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	}
 }
 
-// Registers all service routes in HTTP endpoint.
+// Register method are registers all service routes in HTTP endpoint.
 func (c *PrometheusMetricsService) Register() {
 	c.RegisterRoute("get", "metrics", nil, func(res http.ResponseWriter, req *http.Request) { c.metrics(res, req) })
 }
 
 // Handles metrics requests
-// Return req   an HTTP request
-// Return res   an HTTP response
+// - req   an HTTP request
+// - res   an HTTP response
 func (c *PrometheusMetricsService) metrics(res http.ResponseWriter, req *http.Request) {
 
 	var counters []*ccount.Counter

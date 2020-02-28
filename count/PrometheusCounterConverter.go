@@ -7,23 +7,19 @@ import (
 	ccount "github.com/pip-services3-go/pip-services3-components-go/count"
 )
 
-// /**
-//  * Helper class that converts performance counter values into
-//  * a response from Prometheus metrics service.
-//  */
-
+//  PrometheusCounterConverter is helper class that converts performance counter values into
+//  a response from Prometheus metrics service.
 var PrometheusCounterConverter TPrometheusCounterConverter = TPrometheusCounterConverter{}
 
 type TPrometheusCounterConverter struct {
 }
 
-/**
- * Converts the given counters to a string that is returned by Prometheus metrics service.
- *
- * @param counters  a list of counters to convert.
- * @param source    a source (context) name.
- * @param instance  a unique instance name (usually a host name).
- */
+// ToString method converts the given counters to a string that is returned by Prometheus metrics service.
+// - counters  a list of counters to convert.
+// - source    a source (context) name.
+// - instance  a unique instance name (usually a host name).
+// Returns string
+// string view of counter
 func (c *TPrometheusCounterConverter) ToString(counters []*ccount.Counter, source string, instance string) string {
 
 	if counters == nil || len(counters) == 0 {

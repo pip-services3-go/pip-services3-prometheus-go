@@ -56,8 +56,6 @@ func (c *CountersFixture) TestSimpleCounters(t *testing.T) {
 		{
 		}
 	}
-
-	//setTimeout(done, 1000);
 }
 
 func (c *CountersFixture) TestMeasureElapsedTime(t *testing.T) {
@@ -76,6 +74,5 @@ func (c *CountersFixture) TestMeasureElapsedTime(t *testing.T) {
 			{
 			}
 		}
-		//setTimeout(done, 1000);
 	})
 }
