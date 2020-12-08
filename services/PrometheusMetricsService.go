@@ -16,15 +16,15 @@ PrometheusMetricsService is service that exposes "/metrics" route for Prometheus
 
 Configuration parameters:
 
-- dependencies:
-  - endpoint:              override for HTTP Endpoint dependency
-  - prometheus-counters:   override for PrometheusCounters dependency
-- connection(s):
-  - discovery_key:         (optional) a key to retrieve the connection from IDiscovery
-  - protocol:              connection protocol: http or https
-  - host:                  host name or IP address
-  - port:                  port number
-  - uri:                   resource URI or connection string with all parameters in it
+  - dependencies:
+    - endpoint:              override for HTTP Endpoint dependency
+    - prometheus-counters:   override for PrometheusCounters dependency
+  - connection(s):
+    - discovery_key:         (optional) a key to retrieve the connection from IDiscovery
+    - protocol:              connection protocol: http or https
+    - host:                  host name or IP address
+    - port:                  port number
+    - uri:                   resource URI or connection string with all parameters in it
 
 References:
 
@@ -46,10 +46,10 @@ See RestClient
         "connection.port", "8080",
     ));
 
-	err := service.Open("123")
-	if  err == nil {
-	   fmt.Println("The Prometheus metrics service is accessible at http://localhost:8080/metrics");
-	   defer service.Close("")
+    err := service.Open("123")
+    if  err == nil {
+        fmt.Println("The Prometheus metrics service is accessible at http://localhost:8080/metrics");
+        defer service.Close("")
     }
 */
 type PrometheusMetricsService struct {
@@ -73,7 +73,7 @@ func NewPrometheusMetricsService() *PrometheusMetricsService {
 
 // SetReferences is sets references to dependent components.
 // Parameters:
-// - references cref.IReferences
+//   - references cref.IReferences
 // references to locate the component dependencies.
 func (c *PrometheusMetricsService) SetReferences(references cref.IReferences) {
 	c.RestService.SetReferences(references)
@@ -102,8 +102,8 @@ func (c *PrometheusMetricsService) Register() {
 }
 
 // Handles metrics requests
-// - req   an HTTP request
-// - res   an HTTP response
+//   - req   an HTTP request
+//   - res   an HTTP response
 func (c *PrometheusMetricsService) metrics(res http.ResponseWriter, req *http.Request) {
 
 	var counters []*ccount.Counter

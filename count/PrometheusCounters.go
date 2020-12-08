@@ -23,16 +23,16 @@ Alternatively when connection parameters are set it can push metrics to Promethe
 
 Configuration parameters:
 
-- connection(s):
-  - discovery_key:         (optional) a key to retrieve the connection from connect.idiscovery.html IDiscovery
-  - protocol:              connection protocol: http or https
-  - host:                  host name or IP address
-  - port:                  port number
-  - uri:                   resource URI or connection string with all parameters in it
-- options:
-  - retries:               number of retries (default: 3)
-  - connect_timeout:       connection timeout in milliseconds (default: 10 sec)
-  - timeout:               invocation timeout in milliseconds (default: 10 sec)
+  - connection(s):
+    - discovery_key:         (optional) a key to retrieve the connection from connect.idiscovery.html IDiscovery
+    - protocol:              connection protocol: http or https
+    - host:                  host name or IP address
+    - port:                  port number
+    - uri:                   resource URI or connection string with all parameters in it
+  - options:
+    - retries:               number of retries (default: 3)
+    - connect_timeout:       connection timeout in milliseconds (default: 10 sec)
+    - timeout:               invocation timeout in milliseconds (default: 10 sec)
 
 References:
 
