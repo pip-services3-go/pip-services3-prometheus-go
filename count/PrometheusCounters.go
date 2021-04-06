@@ -96,10 +96,9 @@ func NewPrometheusCounters() *PrometheusCounters {
 // - config   *cconf.ConfigParams
 // configuration parameters to be set.
 func (c *PrometheusCounters) Configure(config *cconf.ConfigParams) {
-
 	c.CachedCounters.Configure(config)
-
 	c.connectionResolver.Configure(config)
+
 	c.source = config.GetAsStringWithDefault("source", c.source)
 	c.instance = config.GetAsStringWithDefault("instance", c.instance)
 	c.retries = config.GetAsIntegerWithDefault("options.retries", c.retries)

@@ -53,7 +53,7 @@ See RestClient
     }
 */
 type PrometheusMetricsService struct {
-	*rpcservices.RestService
+	rpcservices.RestService
 	cachedCounters *ccount.CachedCounters
 	source         string
 	instance       string
@@ -63,12 +63,11 @@ type PrometheusMetricsService struct {
 // Returns *PrometheusMetricsService
 // pointer on new instance
 func NewPrometheusMetricsService() *PrometheusMetricsService {
-	c := PrometheusMetricsService{}
-	c.RestService = rpcservices.NewRestService()
-	c.RestService.IRegisterable = &c
+	c := &PrometheusMetricsService{}
+	c.RestService = *rpcservices.InheritRestService(c)
 	c.DependencyResolver.Put("cached-counters", cref.NewDescriptor("pip-services", "counters", "cached", "*", "1.0"))
 	c.DependencyResolver.Put("prometheus-counters", cref.NewDescriptor("pip-services", "counters", "prometheus", "*", "1.0"))
-	return &c
+	return c
 }
 
 // SetReferences is sets references to dependent components.
