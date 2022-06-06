@@ -33,7 +33,7 @@ jobs:
         tag_name: "v${{ steps.build_info.outputs.component_version }}-${{ steps.build_info.outputs.build_number }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - name: Tag branch with the build number
       uses: tvdias/github-tagger@v0.0.1
       with:
@@ -43,7 +43,7 @@ jobs:
     ############# Clear #############
 
     - name: Clean up
-      uses: pip-devops/actions/node/clear@v1
+      uses: pip-devops/actions/go/clear@v1
     
   metrics:
     needs: ci
